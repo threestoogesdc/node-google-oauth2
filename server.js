@@ -10,7 +10,15 @@ var CLIENT_ID = '670315590273',
     BASE_SITE = 'https://accounts.google.com/o',
     AUTH_PATH = '/oauth2/auth',
     TOKEN_PATH = '/oauth2/token',
-    oa;
+    
+    REDIRECT_URI = 'http://google-oauth2.threestoogesdc.c9.io/oauth2callback',
+    SCOPES = [
+      'https://www.googleapis.com/auth/drive.file',
+      'https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/userinfo.profile'
+    ].join(' ');
+    
+var _oa;
 
 //configure environment
 app.configure(function() {
@@ -26,16 +34,14 @@ app.get('/?', function(req, res) {
 });
 
 app.get('/home', function(req, res) {
-  oa = new oauth.OAuth2();
+  res.send(200, 'home');
 });
 
 app.get('/auth', function(req, res) {
-  var _scope = 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
-      _response_type = 'code',
-      _redirect_uri = 'http://google-oauth2.threestoogesdc.c9.io/oauth2callback';
+  var _response_type = 'code';
   
   //clientId, clientSecret, baseSite, authorizePath, accessTokenPath, customHeaders
-  var oa = new oauth.OAuth2(
+  _oa = new oauth.OAuth2(
     CLIENT_ID,
     CLIENT_SECRET,
     BASE_SITE,
@@ -43,16 +49,31 @@ app.get('/auth', function(req, res) {
     TOKEN_PATH
   );
   
-  res.redirect(oa.getAuthorizeUrl({
-    scope: _scope,
+  res.redirect(_oa.getAuthorizeUrl({
+    scope: SCOPES,
     response_type: _response_type,
-    redirect_uri: _redirect_uri
+    redirect_uri: REDIRECT_URI
   }));
 });
 
 app.get('/oauth2callback', function(req, res) {
+  var _code = req.param('code', false);
   
-  res.send(200, 'callback'); 
+  _oa.getOAuthAccessToken(_code, {
+    client_id: CLIENT_ID,
+    client_secret: CLIENT_SECRET,
+    redirect_uri: REDIRECT_URI,
+    grant_type: 'authorization_code'
+  }, function(err, access_token, refresh_token) {
+    if(err) {
+      res.end('error: ' + JSON.stringify(err));
+    }
+    else {
+      res.write('access token: ' + access_token + '\n');
+      res.write('refresh token: ' + refresh_token);
+      res.end();
+    }
+  });
 });
 
 app.listen(port, host);
