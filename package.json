@@ -1,0 +1,11 @@
+{
+  "name": "google-oauth2",
+  "description": "Utilize Goolge OAuth 2.0 to access user data",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "3.x",
+    "jade": "0.28.x",
+    "oauth": "0.9.x"
+  }
+}
