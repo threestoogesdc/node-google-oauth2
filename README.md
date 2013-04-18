@@ -1,1 +1,1 @@
-Utilize Goolge OAuth 2.0 to access user data
+Utilize Goolge OAuth 2.0 in a Nodejs application to access user data.
